@@ -1,12 +1,11 @@
 {
-    "command": "head",
-    "aggregate": "$PASH_TOP/runtime/agg/py/head.py",
+    "command": "concat.sh",
     "cases":
     [
         {
             "predicate": "default",
             "class": "pure",
-            "inputs": ["stdin"],
+            "inputs": ["args[:]"],
             "outputs": ["stdout"]
         }
     ]

@@ -1,5 +1,5 @@
 {
-    "command": "test_two",
+    "command": "test_uniq_1",
     "cases":
     [
         {
@@ -9,7 +9,7 @@
             "outputs": ["stdout"],
             "aggregator":
             {
-                "path": "runtime/agg/py/cat.py"
+                "path": "runtime/agg/bin/uniq"
             }
         }
     ]

@@ -49,3 +49,8 @@ compiler/1-grams.txt
 compiler/2-grams.txt
 runtime/dgsh-tee
 *.res
+M1_times.txt
+M1_widths.txt
+M2_times.txt
+M2_widths.txt
+forevaluation.tar.gz

@@ -6,6 +6,10 @@ import math
 from sklearn.preprocessing import normalize
 
 
+def time_to_sec(time):
+    return float(time[:time.find('m')])*60+float(time[time.find('m')+1:-1])
+
+
 def script_parser(script_file, CMD_LIST, dataFile):
     """
     parses bash script for pash width selector
@@ -54,6 +58,7 @@ def width_selector_M1(script, dataFile):
     predicts an optimal width for performance of pash based on performance models
     Args:
         script: script file name and path
+        dataFile: path to input file. Used to get file size, not for running the script
 
     Returns: predicted optimal width for pash
     """
@@ -77,6 +82,7 @@ def width_selector_M2(script, dataFile):
     predicts an optimal width for performance of pash based on performance models
     Args:
         script: script file name and path
+        dataFile: path to input file. Used to get file size, not for running the script
 
     Returns: predicted optimal width for pash
     """
@@ -84,7 +90,7 @@ def width_selector_M2(script, dataFile):
                                               ["grep-complex", "grep-simple", "sort", "tr", "wc", "uniq"], dataFile)
     # Method two: weighted average of speedup matricies
     template_full_time_matrix = pd.read_csv('performance-models/sort_full_time_matrix.csv', index_col=0)
-    cumulative_time_matrix = np.zeros(template_full_time_matrix.to_numpy().shape)
+    # cumulative_time_matrix = np.zeros(template_full_time_matrix.to_numpy().shape)
     quantized_size = int(math.floor(math.log(INPUT_FILE_SIZE, 10)))
     SIZE_INDEX = quantized_size-6
     opt_speedup_widths = []
@@ -103,4 +109,33 @@ def width_selector_M2(script, dataFile):
     for CMDi in range(len(norm_weighted_times)):
         weighted_sum += opt_speedup_widths[CMDi]*norm_weighted_times[CMDi]
     OPT_WIDTH = round(weighted_sum/(sum(CMD_FREQ[0])))
+    return OPT_WIDTH
+
+
+def width_selector_M3(script, maxW, dataFile, step=2):
+    """
+    predicts an optimal width for performance of pash based on performance models
+    Args:
+        script: script file name and path
+        maxW: maximum width to be tested
+        dataFile: path to input file. Used to get file size, not for running the script
+        step: step increment of width
+
+    Returns: optimal width for pash
+    """
+    # Method three: experimental to get ground truth (optimal width)
+    IN_SIZE = os.path.getsize(dataFile)
+    quantized_size = int(math.floor(math.log(IN_SIZE, 10)))
+    log = "Results/M3times.txt"
+    times = []
+    for i in range(1, maxW, step):
+        subprocess.run(["./m3-time.sh", script, log, str(i)], stdout=subprocess.DEVNULL)
+        with open(log, 'r') as f:
+            cur_time = f.readlines()
+        times.append(time_to_sec(cur_time[1].split()[1]))
+    script_time_model_path = "performance-models/"+script.split('/')[-1][:-3]
+    if not os.path.exists(script_time_model_path):
+        os.mkdir(script_time_model_path)
+    np.savetxt(script_time_model_path+"/M3_SIZE"+str(quantized_size)+"_s"+str(step)+"_Mw"+str(maxW), np.asarray(times))
+    OPT_WIDTH=np.argmin(times)*step+1
     return OPT_WIDTH

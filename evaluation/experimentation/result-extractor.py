@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import multiprocessing
 import os
+from widthselector import time_to_sec
 
 FILE_NAME = "/home/daniel/Research/fromRemote/lin02/smalltimes.txt"
 # FILE_NAME = os.environ['PASH_TOP']+"/../common-commands-time.out"
@@ -37,10 +38,6 @@ for i in range(len(COMMANDS)):
         size_times.append(width_times)
     real_times_temp.append(size_times)
 real_times = real_times_temp
-
-
-def time_to_sec(time):
-    return float(time[:time.find('m')])*60+float(time[time.find('m')+1:-1])
 
 
 def populate():
@@ -97,5 +94,6 @@ def fill():
         full_speedup_matrix.to_csv("performance-models/" + CMD + "_full_speedup_matrix.csv")
         print()
 
-fill()
+
+# fill()
 print()

@@ -10,6 +10,22 @@ def time_to_sec(time):
     return float(time[:time.find('m')])*60+float(time[time.find('m')+1:-1])
 
 
+# Classifies grep into grep-complex and grep-simple
+def arg_parser(CMD, grep_th=10):
+    CMD_NAME = CMD[0]
+    if len(CMD) < 1:
+        return CMD_NAME
+    ARGS = CMD[1:]
+    if CMD_NAME == "grep":
+        assert(len(ARGS) >= 1)
+        regex = ARGS[-1]
+        if len(regex) > grep_th:
+            CMD_NAME = "grep-complex"
+        else:
+            CMD_NAME = "grep-simple"
+    return CMD_NAME
+
+
 def script_parser(script_file, CMD_LIST, dataFile):
     """
     parses bash script for pash width selector
@@ -31,12 +47,15 @@ def script_parser(script_file, CMD_LIST, dataFile):
     assert 'cat' in cat_in
     IN_SIZE = os.path.getsize(dataFile)
 
-    pipeline = [_.split()[0] for _ in pipeline]
+    # TODO: parse command flags and args
+    # For now, assume no flags
+    pipeline = [_.split() for _ in pipeline]
+    CMD_NAMES = [arg_parser(_) for _ in pipeline]
     CMD_FREQ = np.zeros(len(CMD_LIST))
     CMD_FREQ = pd.DataFrame(CMD_FREQ, index=CMD_LIST)
-    for CMD in pipeline:
-        if CMD in CMD_LIST:
-            CMD_FREQ.loc[CMD]+=1
+    for CMD_NAME in CMD_NAMES:
+        if CMD_NAME in CMD_LIST:
+            CMD_FREQ.loc[CMD_NAME]+=1
     return CMD_FREQ, IN_SIZE
 
 
@@ -128,7 +147,7 @@ def width_selector_M3(script, maxW, dataFile, step=2):
     quantized_size = int(math.floor(math.log(IN_SIZE, 10)))
     log = "Results/M3times.txt"
     times = []
-    for i in range(1, maxW, step):
+    for i in range(1, maxW+step, step):
         subprocess.run(["./m3-time.sh", script, log, str(i)], stdout=subprocess.DEVNULL)
         with open(log, 'r') as f:
             cur_time = f.readlines()

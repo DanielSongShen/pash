@@ -58,7 +58,7 @@ def concat_models(script, Mw):
         time_matrix.append(temp)
     time_matrix = np.asarray(time_matrix)
     SIZES = [1, 10, 100, 1000]
-    WIDTHS = [i for i in range(1, Mw, int(Mw / len(time_matrix[0])))]
+    WIDTHS = [i for i in range(1, Mw+2, round(Mw / len(time_matrix[0])))]
     time_df = pd.DataFrame(time_matrix, columns=WIDTHS, index=SIZES)
 
     seq_times = time_df[1]
@@ -75,9 +75,11 @@ def concat_models(script, Mw):
     speedup_df.to_csv(path_to_figure+"/speedup_df.csv")
     return None
 
-# script_names = ["minimal_sort", "no_grep", "sort-sort", "top-n", "wf"]
-# [concat_models(s_name, 39) for s_name in script_names]
-# view_methods()
+
+#script_names = ["minimal_sort", "no_grep", "sort-sort", "top-n", "wf"]
+script_names = ["shortest-scripts"]
+[concat_models(s_name, 40) for s_name in script_names]
+view_methods()
 
 
 def compare_methods(script, data_path="/home/daniel/Research/pash_figures", widths_suffix="_im_widths_df"):
@@ -102,7 +104,7 @@ def compare_methods(script, data_path="/home/daniel/Research/pash_figures", widt
     pass
 
 
-compare_methods("minimal_sort")
+#compare_methods("shortest-scripts")
 
 
 # sanity check
